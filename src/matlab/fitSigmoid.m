@@ -40,6 +40,20 @@ y = values(1,:);
 opts = statset('nlinfit');
 opts.RobustWgtFun = 'bisquare';
 
+%estimate if data is supposed to be fitted to a sigmoid,
+%otherwise return 0
+if checkSigmoidality(y)
+else
+   doseHalfMax = 0;
+   rSquare = 0
+   fittingParams = [];
+   x = [];
+   y = [];
+   return;
+end
+
+
+
 %perform the fitting
 
 % this function is depricated here
@@ -48,10 +62,11 @@ opts.RobustWgtFun = 'bisquare';
 
 % this function alloows boundry conditions
 lowerBoundry = size(fittingParams0);
-lowerBoundry(:) = 0
+lowerBoundry(:) = 0;
 
 upperBoundry = size(fittingParams0);
 upperBoundry(2) = 2;
+
 
 [fittingParams,resnorm,R] = lsqcurvefit(modelFunction, fittingParams0,x,y,lowerBoundry,upperBoundry);
 

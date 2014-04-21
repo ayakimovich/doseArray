@@ -58,7 +58,9 @@ conditionsRanges = {...
 %specify input csv file & output folder
 inPath = 'R:\Data\140305_H_paper\simultaneous_addition\doseArray\';
 dataSeparator = ';';
+global outFolderPath;
 outFolderPath = 'R:\Data\140305_H_paper\simultaneous_addition\doseArray\';
+
 %data file comuns
 cellsCol = 1;
 readoutCol = 3;
@@ -80,8 +82,16 @@ for i = 1:size(dataFileList,1)
 end
 
 
-%normalize data, here no treatment control is used as 100%
-conditionsValuesNomalized = cellfun(@normalizeValues, conditionsValues);
-%compute mean and sd
+%normalize data, here no-treatment control is used as 100%
+conditionsValuesNomalized = cellfun(@normalizeValues, conditionsValues,'UniformOutput', false);
+
+%average using population arithmetics of choice: mean, median, mode
+
+[conditionsValuesAvg, conditionsValuesSD] = populationStat(conditionsValuesNomalized, 'median');
 
 %fit each data range to a sigmoidal curve
+
+doseArrayValues = fitDose(conditionsValuesAvg);
+
+%plot & save the dose array results
+plotArray(doseArrayValues, 'pdf');

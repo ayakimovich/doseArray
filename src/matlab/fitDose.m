@@ -1,4 +1,4 @@
-function [IC50array, LD50array, PhIdxarray] = fitDose(conditionsValues)
+function doseArrayValues = fitDose(conditionsValues)
 %FITDOSE fitting the data array to either IC50 or LD50
 %   input: dose array (averaged data expected)
 %   output: array of fitted values
@@ -31,30 +31,35 @@ function [IC50array, LD50array, PhIdxarray] = fitDose(conditionsValues)
                         %last three args: drug name, condition name,
                         %replica number
                         drugName = cell2mat(conditionsValues.(fieldsNames{iFields}){1,iDrugs}(1, 1));
-                        conditionName  = cel2mat(conditionsValues.(fieldsNames{iFields}){1,iDrugs}(iConditions, 1));
+                        conditionName  = cell2mat(conditionsValues.(fieldsNames{iFields}){1,iDrugs}(iConditions, 1));
                         plotFitting(fittingParams,x, y, rSquare,...
                             drugName, conditionName, 'readout');
-                        conditionFieldName = conditionName;
-                        conditionFieldName(ismember(conditionFieldName,' ')) = '-';
-                        conditionFieldName(ismember(conditionFieldName,'.')) = '-';
+                        conditionFieldName = parseSymbols(conditionName, 'forward', 'c_');
                         %here we assable the IC50 LD50 data into a results array 
-                        doseArray.IC50.(drugName).(conditionFieldName) = IC50;
+                        doseArrayValues.IC50.(parseSymbols(drugName, 'forward', 'c_')).(conditionFieldName) = IC50;
                         
                         
                     case 'cells'
                         if iConditions > 2
                             continue;
                         end
+                        drugName = cell2mat(conditionsValues.(fieldsNames{iFields}){1,iDrugs}(1, 1));
+                        conditionName  = cell2mat(conditionsValues.(fieldsNames{iFields}){1,iDrugs}(iConditions, 1));
                         [LD50, rSquare, fittingParams, x, y] = fitSigmoid(...
                             cell2mat(conditionsValues.(fieldsNames{iFields}){1,iDrugs}(1, 3:end-1)),...
                             cell2mat(conditionsValues.(fieldsNames{iFields}){1,iDrugs}(2, 3:end-1)));
                         %plot and save fitting results:
                         %last three args: drug name, condition name,
                         %replica number
-                        plotFitting(fittingParams,x, y, rSquare,...
-                            conditionsValues.(fieldsNames{iFields}){1,iDrugs}(1, 1),...
-                            conditionsValues.(fieldsNames{iFields}){1,iDrugs}(iConditions, 1), 'cells');
-                                            
+                        if rSquare > 0
+                            plotFitting(fittingParams,x, y, rSquare,...
+                                drugName, conditionName, 'cells');
+                        end
+                        
+                        conditionFieldName = parseSymbols(conditionName, 'forward', 'c_');
+                        %here we assable the IC50 LD50 data into a results array 
+                        doseArrayValues.LD50.(parseSymbols(drugName, 'forward', 'c_')).(conditionFieldName) = LD50;
+                        
                     otherwise
                         error('Unknown case for dose computation definition, please define it in the fitDose function');
                 end
@@ -68,11 +73,6 @@ function [IC50array, LD50array, PhIdxarray] = fitDose(conditionsValues)
             end
         end
     end
-
-
-IC50array = 0;
-LD50array = 0;
-PhIdxarray = 0;
 
 end
 

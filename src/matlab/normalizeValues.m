@@ -29,7 +29,7 @@ for iFields = 1:numel(fieldsNames)
                 if iConditions == 2
                     continue;
                 end
-                Xmax = cell2mat(conditionsValues.(fieldsNames{iFields}){1,iDrugs}(iConditions, 2));
+                Xmax = cell2mat(conditionsValues.(fieldsNames{iFields}){1,iDrugs}(3, 2));
             case 'cells'
                 Xmax = cell2mat(conditionsValues.(fieldsNames{iFields}){1,iDrugs}(2, 2));
             otherwise
